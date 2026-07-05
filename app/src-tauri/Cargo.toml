@@ -1,7 +1,7 @@
 [package]
-name = "kibble"
+name = "food-diary"
 version = "0.1.0"
-description = "A pixel cat that eats your food photos."
+description = "A Food Diary companion app and Codex skill."
 authors = ["Tom"]
 edition = "2021"
 

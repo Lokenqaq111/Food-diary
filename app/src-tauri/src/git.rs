@@ -42,7 +42,7 @@ pub fn commit_and_push(repo: &Path, count: usize) -> Result<()> {
         return Ok(());
     }
 
-    let message = format!("kibble: add {} item(s)", count);
+    let message = format!("food-diary: add {} item(s)", count);
     run(repo, &["commit", "-m", &message])?;
     run(repo, &["push"])?;
     Ok(())

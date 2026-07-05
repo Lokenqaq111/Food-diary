@@ -4,13 +4,13 @@ use std::path::PathBuf;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-const TEMPLATE: &str = r#"# Kibble configuration
+const TEMPLATE: &str = r#"# Food Diary configuration
 # Path to a local clone of your data repository.
-# Kibble does NOT clone or init this for you.
+# Food Diary does NOT clone or init this for you.
 repo_path = ""
 
 # Optional: meal type time thresholds (24h format).
-# Kibble does not use these directly — the downstream Skill does.
+# The desktop app does not use these directly — the downstream Skill does.
 [meal_times]
 breakfast = ["06:00", "09:59"]
 lunch     = ["10:00", "13:59"]
@@ -55,7 +55,17 @@ impl Default for Config {
 
 pub fn config_path() -> Result<PathBuf> {
     let base = dirs::config_dir().context("could not resolve OS config dir")?;
-    Ok(base.join("kibble").join("config.toml"))
+    let food_diary = base.join("food-diary").join("config.toml");
+    if food_diary.exists() {
+        return Ok(food_diary);
+    }
+
+    let legacy_kibble = base.join("kibble").join("config.toml");
+    if legacy_kibble.exists() {
+        return Ok(legacy_kibble);
+    }
+
+    Ok(food_diary)
 }
 
 pub fn load_or_init() -> Result<(Config, PathBuf)> {
@@ -65,7 +75,7 @@ pub fn load_or_init() -> Result<(Config, PathBuf)> {
             fs::create_dir_all(parent).ok();
         }
         fs::write(&path, TEMPLATE).context("writing config template")?;
-        eprintln!("kibble: created config template at {}", path.display());
+        eprintln!("food-diary: created config template at {}", path.display());
         return Ok((Config::default(), path));
     }
     let text = fs::read_to_string(&path).context("reading config")?;
@@ -73,7 +83,7 @@ pub fn load_or_init() -> Result<(Config, PathBuf)> {
         Ok(cfg) => Ok((cfg, path)),
         Err(e) => {
             eprintln!(
-                "kibble: config at {} is invalid ({}), using defaults",
+                "food-diary: config at {} is invalid ({}), using defaults",
                 path.display(),
                 e
             );

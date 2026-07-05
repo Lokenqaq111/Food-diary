@@ -1,23 +1,23 @@
 ---
 name: food-diary
-description: Log and evaluate food intake from images or notes. Use when the user attaches, pastes, or points to food photos, drink photos, receipts, menus, delivery screenshots, or asks to log food, update a food diary, process a meal, 整理饮食记录, 记一餐, 记录吃的, 评价饮食, generate a diet report, sync Apple Health, or process the legacy Kibble inbox. Default food logging accepts direct chat images and local image paths without requiring the Kibble app or inbox. It writes nutrition JSON and index.csv entries to the configured health-log repo, can optionally process the old inbox, can sync Apple Health exports, and can generate Word diet/health reports.
+description: Log and evaluate food intake from images or notes. Use when the user attaches, pastes, or points to food photos, drink photos, receipts, menus, delivery screenshots, or asks to log food, update a food diary, process a meal, 整理饮食记录, 记一餐, 记录吃的, 评价饮食, generate a diet report, sync Apple Health, or process the legacy inbox. Default food logging accepts direct chat images and local image paths without requiring the desktop app or inbox. It writes nutrition JSON and index.csv entries to the configured health-log repo, can optionally process the old inbox, can sync Apple Health exports, and can generate Word diet/health reports.
 ---
 
 # Food Diary
 
-This skill logs meals from **direct user-provided images first**. The user can attach an image in chat, paste a screenshot, provide a local image path, or describe a meal in text. The old Kibble app inbox remains a legacy input path only when the user explicitly asks to process it.
+This skill logs meals from **direct user-provided images first**. The user can attach an image in chat, paste a screenshot, provide a local image path, or describe a meal in text. The old desktop inbox remains a legacy input path only when the user explicitly asks to process it.
 
-The skill stores source meal records in a health-log repo, usually `/Users/tom/Desktop/health-log`, using the existing `index.csv` plus per-item `.nutrition.json` and optional `.note.txt` files. It does not need the Kibble desktop app to receive new food images.
+The skill stores source meal records in a health-log repo, usually `/Users/tom/Desktop/health-log`, using the existing `index.csv` plus per-item `.nutrition.json` and optional `.note.txt` files. It does not need the desktop app to receive new food images.
 
 ## Modes
 
 1. **Log food** (default) - process direct chat images, pasted screenshots, local image paths, or meal notes into the food diary.
-2. **Legacy inbox process** - drain `<repo>/inbox/` only when the user explicitly says to process the Kibble inbox.
+2. **Legacy inbox process** - drain `<repo>/inbox/` only when the user explicitly says to process the legacy inbox.
 3. **Apple Health sync** - parse `~/Desktop/apple_health_export/` into `<repo>/health/`.
 4. **Diet report** - aggregate `index.csv` into a Word report on the Desktop.
 5. **Health report** - after Apple Health sync, generate a Word health report on the Desktop.
 
-Decide the mode from the user request. If the request contains food imagery or meal text and does not mention `inbox` or `Kibble`, use **Log food**.
+Decide the mode from the user request. If the request contains food imagery or meal text and does not mention `inbox`, use **Log food**.
 
 After a food logging run finishes, ask the user: `also sync Apple Health export? (y/n)`. If yes, run Apple Health sync and fold it into the same commit.
 
@@ -28,8 +28,9 @@ Diet report is standalone and read-only on the repo. It does not touch the inbox
 Resolve the repo path in this order:
 
 1. A repo path explicitly supplied by the user.
-2. `repo_path` from `~/Library/Application Support/kibble/config.toml`, if present.
-3. `/Users/tom/Desktop/health-log`.
+2. `repo_path` from `~/Library/Application Support/food-diary/config.toml`, if present.
+3. `repo_path` from legacy `~/Library/Application Support/kibble/config.toml`, if present.
+4. `/Users/tom/Desktop/health-log`.
 
 Also read `[meal_times]` from the same config when present:
 
@@ -54,7 +55,7 @@ Supported legacy inputs:
 
 - `<repo>/inbox/` images plus sibling `*.note.txt` files, only when explicitly requested.
 
-For attached chat images with no accessible local file path, use the visible image content directly. Do not ask the user to drag the image into Kibble or copy it into `inbox/`.
+For attached chat images with no accessible local file path, use the visible image content directly. Do not ask the user to copy it into `inbox/`.
 
 ## Core Rules
 
@@ -391,7 +392,7 @@ Then skip report generation rather than blocking food logging.
 
 ## What This Skill Does Not Do
 
-- Require the Kibble app for new images.
+- Require the desktop app for new images.
 - Store original food photos by default.
 - Delete or move direct user-provided files.
 - Re-classify already-filed items into different meal folders unless the user explicitly asks.

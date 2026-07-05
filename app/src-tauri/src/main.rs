@@ -92,16 +92,16 @@ fn main() {
     let (cfg, path) = match config::load_or_init() {
         Ok(v) => v,
         Err(e) => {
-            eprintln!("kibble: failed to load config: {e:#}");
+            eprintln!("food-diary: failed to load config: {e:#}");
             (config::Config::default(), Default::default())
         }
     };
-    eprintln!("kibble: config = {}", path.display());
+    eprintln!("food-diary: config = {}", path.display());
 
     if cfg.repo_path.is_empty() {
-        eprintln!("kibble: repo_path is unset — set it in the app");
+        eprintln!("food-diary: repo_path is unset — set it in the app");
     } else if let Err(e) = validate_repo(&cfg.repo_path) {
-        eprintln!("kibble: repo invalid ({e})");
+        eprintln!("food-diary: repo invalid ({e})");
     }
 
     tauri::Builder::default()

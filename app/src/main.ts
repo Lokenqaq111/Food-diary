@@ -74,7 +74,7 @@ function closeScroll() {
 function enterSetupMode() {
   mode = "setup";
   setState("dead");
-  openScroll("repo path? e.g. /Users/you/kibble-data");
+  openScroll("repo path? e.g. /Users/you/food-diary-data");
 }
 
 function enterReadyMode() {
@@ -190,7 +190,7 @@ async function bootstrap() {
     await invoke("startup_check");
     enterReadyMode();
   } catch (e) {
-    console.error("kibble:", e);
+    console.error("food-diary:", e);
     enterSetupMode();
   }
 }
