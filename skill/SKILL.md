@@ -255,15 +255,30 @@ Rules:
 
 ## Commit And Push
 
+Stage **only the paths this run touched**. Do not use `git add -A` — the health-log repo may contain unrelated local files.
+
 Run from the repo:
 
 ```bash
-git add -A
+# always, when food was logged or index.csv changed
+git add index.csv
+
+# each dated meal folder written this run (repeat per day/meal touched)
+git add YYYY/MM/DD/
+
+# legacy inbox only: stage inbox deletions and unreadable moves
+git add inbox/ unreadable/
+
+# Apple Health sync only
+git add health/
+
 if ! git diff --cached --quiet; then
   git commit -m "<message>"
   git push
 fi
 ```
+
+If a path was not modified this run, skip it. Never stage Desktop reports, transient previews, or other unrelated files.
 
 Commit messages:
 
@@ -360,7 +375,7 @@ Charts plot only complete days (at least two meal slots or at least two items) t
 If dependencies are missing, tell the user:
 
 ```bash
-pip3 install python-docx matplotlib pandas
+pip3 install -r <skill_root>/requirements.txt
 ```
 
 Then skip report generation rather than blocking food logging.

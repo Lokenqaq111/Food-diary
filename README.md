@@ -29,7 +29,7 @@ ln -s /path/to/food-diary/skill ~/.codex/skills/food-diary
 Report scripts need Python dependencies:
 
 ```bash
-pip3 install python-docx matplotlib pandas
+pip3 install -r skill/requirements.txt
 ```
 
 ## Reports
