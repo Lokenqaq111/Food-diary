@@ -1,13 +1,13 @@
 ---
 name: food-diary
-description: Log and evaluate food intake from images or notes. Use when the user attaches, pastes, or points to food photos, drink photos, receipts, menus, delivery screenshots, or asks to log food, update a food diary, process a meal, 整理饮食记录, 记一餐, 记录吃的, 评价饮食, generate a diet report, sync Apple Health, or process the legacy inbox. Default food logging accepts direct chat images and local image paths without requiring the desktop app or inbox. It writes nutrition JSON and index.csv entries to the configured health-log repo, can optionally process the old inbox, can sync Apple Health exports, and can generate Word diet/health reports.
+description: Log and evaluate food intake from images or notes. Use when the user attaches, pastes, or points to food photos, drink photos, receipts, menus, delivery screenshots, or asks to log food, update a food diary, process a meal, 整理饮食记录, 记一餐, 记录吃的, 评价饮食, generate a diet report, sync Apple Health, or process the legacy inbox. Default food logging accepts direct chat images and local image paths without requiring an inbox. It writes nutrition JSON and index.csv entries to the configured health-log repo, can optionally process the old inbox, can sync Apple Health exports, and can generate Word diet/health reports.
 ---
 
 # Food Diary
 
 This skill logs meals from **direct user-provided images first**. The user can attach an image in chat, paste a screenshot, provide a local image path, or describe a meal in text. The old desktop inbox remains a legacy input path only when the user explicitly asks to process it.
 
-The skill stores source meal records in a health-log repo, usually `/Users/tom/Desktop/health-log`, using the existing `index.csv` plus per-item `.nutrition.json` and optional `.note.txt` files. It does not need the desktop app to receive new food images.
+The skill stores source meal records in a health-log repo, usually `/Users/tom/Desktop/health-log`, using the existing `index.csv` plus per-item `.nutrition.json` and optional `.note.txt` files. Vision, portion estimation, and nutrition lookup are performed by the agent — this skill provides the recording framework and file layout.
 
 ## Modes
 
@@ -255,15 +255,30 @@ Rules:
 
 ## Commit And Push
 
+Stage **only the paths this run touched**. Do not use `git add -A` — the health-log repo may contain unrelated local files.
+
 Run from the repo:
 
 ```bash
-git add -A
+# always, when food was logged or index.csv changed
+git add index.csv
+
+# each dated meal folder written this run (repeat per day/meal touched)
+git add YYYY/MM/DD/
+
+# legacy inbox only: stage inbox deletions and unreadable moves
+git add inbox/ unreadable/
+
+# Apple Health sync only
+git add health/
+
 if ! git diff --cached --quiet; then
   git commit -m "<message>"
   git push
 fi
 ```
+
+If a path was not modified this run, skip it. Never stage Desktop reports, transient previews, or other unrelated files.
 
 Commit messages:
 
@@ -360,7 +375,7 @@ Charts plot only complete days (at least two meal slots or at least two items) t
 If dependencies are missing, tell the user:
 
 ```bash
-pip3 install python-docx matplotlib pandas
+pip3 install -r <skill_root>/requirements.txt
 ```
 
 Then skip report generation rather than blocking food logging.
@@ -392,7 +407,6 @@ Then skip report generation rather than blocking food logging.
 
 ## What This Skill Does Not Do
 
-- Require the desktop app for new images.
 - Store original food photos by default.
 - Delete or move direct user-provided files.
 - Re-classify already-filed items into different meal folders unless the user explicitly asks.

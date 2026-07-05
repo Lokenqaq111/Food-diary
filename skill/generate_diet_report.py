@@ -229,18 +229,18 @@ def build_report(repo):
     doc.add_heading("营养趋势图（红色虚线为示例阈值）", 2)
     doc.add_paragraph("下图仅含记录完整的日子。热量与脂肪用「上限」红线——超线标红；"
                       "蛋白用「下限」红线——低于线标红。阈值为示例值，可在脚本顶部调整。")
-    chartdir = tempfile.mkdtemp(prefix="food-diary-charts-")
-    for key, cfg, flag, png in make_charts(days, complete, chartdir):
-        doc.add_picture(png, width=Inches(6.3))
-        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-        crossed = [complete[i][5:] for i in range(len(complete)) if flag[i]]
-        verb = "超上限" if cfg["kind"] == "ceiling" else "低于下限"
-        capp = doc.add_paragraph()
-        r = capp.add_run(f"{cfg['label']}：{verb}的日子 = "
-                         + ("、".join(crossed) if crossed else "无")
-                         + f"（红线 {cfg['line']}）")
-        r.font.size = Pt(8); r.italic = True
-        capp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    with tempfile.TemporaryDirectory(prefix="food-diary-charts-") as chartdir:
+        for key, cfg, flag, png in make_charts(days, complete, chartdir):
+            doc.add_picture(png, width=Inches(6.3))
+            doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            crossed = [complete[i][5:] for i in range(len(complete)) if flag[i]]
+            verb = "超上限" if cfg["kind"] == "ceiling" else "低于下限"
+            capp = doc.add_paragraph()
+            r = capp.add_run(f"{cfg['label']}：{verb}的日子 = "
+                             + ("、".join(crossed) if crossed else "无")
+                             + f"（红线 {cfg['line']}）")
+            r.font.size = Pt(8); r.italic = True
+            capp.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     # 3 + 4. data-driven signals
     good, issues = build_signals(days, dates, complete, rows)
