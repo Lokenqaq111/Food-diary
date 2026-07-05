@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Diet report generator for the kibble health-log.
+"""Diet report generator for the Food Diary health-log.
 
 Usage:
     generate_diet_report.py <repo_path>
@@ -181,14 +181,14 @@ def build_report(repo):
     fast = sum(days[d]["fast"] for d in dates)
     sweet = sum(days[d]["sweet"] for d in dates)
     today = datetime.date.today().isoformat()
-    out = os.path.expanduser(f"~/Desktop/kibble-diet-report-{today}.docx")
+    out = os.path.expanduser(f"~/Desktop/food-diary-report-{today}.docx")
 
     doc = Document()
     st = doc.styles["Normal"]; st.font.name = "Helvetica"; st.font.size = Pt(10.5)
 
     doc.add_heading("饮食记录评估报告", 0)
     sub = doc.add_paragraph(f"数据区间：{dates[0]} → {dates[-1]}　|　"
-                            f"生成日期：{today}　|　来源：kibble health-log")
+                            f"生成日期：{today}　|　来源：Food Diary health-log")
     sub.runs[0].italic = True; sub.runs[0].font.size = Pt(9)
 
     # 1. overview
@@ -229,7 +229,7 @@ def build_report(repo):
     doc.add_heading("营养趋势图（红色虚线为示例阈值）", 2)
     doc.add_paragraph("下图仅含记录完整的日子。热量与脂肪用「上限」红线——超线标红；"
                       "蛋白用「下限」红线——低于线标红。阈值为示例值，可在脚本顶部调整。")
-    chartdir = tempfile.mkdtemp(prefix="kibble-charts-")
+    chartdir = tempfile.mkdtemp(prefix="food-diary-charts-")
     for key, cfg, flag, png in make_charts(days, complete, chartdir):
         doc.add_picture(png, width=Inches(6.3))
         doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
